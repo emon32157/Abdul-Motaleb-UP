@@ -308,19 +308,19 @@ export const AIChatbot: React.FC = () => {
       ? 'lg:w-[480px] lg:h-[700px] lg:max-h-[90vh]'
       : 'lg:w-[420px] lg:h-[620px] lg:max-h-[85vh]';
 
-  // Position based on admin settings
+  // Position based on admin settings - elevated slightly for better visibility and clearance
   const isLeft = aiSettings.position === 'bottom-left';
   const posClassesLauncher = isLeft
-    ? 'bottom-16 lg:bottom-6 left-4 sm:left-6'
-    : 'bottom-16 lg:bottom-6 right-4 sm:right-6';
+    ? 'bottom-20 sm:bottom-22 lg:bottom-10 left-4 sm:left-6'
+    : 'bottom-20 sm:bottom-22 lg:bottom-10 right-4 sm:right-6';
 
   const posClassesWindow = isLeft
     ? isMinimized
-      ? 'bottom-16 lg:bottom-6 left-4 sm:left-6 w-72 h-14'
-      : `bottom-0 lg:bottom-6 left-0 lg:left-6 w-full ${sizeClasses} rounded-none lg:rounded-2xl`
+      ? 'bottom-20 sm:bottom-22 lg:bottom-10 left-4 sm:left-6 w-72 h-14'
+      : `bottom-0 lg:bottom-10 left-0 lg:left-6 w-full ${sizeClasses} rounded-none lg:rounded-2xl`
     : isMinimized
-    ? 'bottom-16 lg:bottom-6 right-4 sm:right-6 w-72 h-14'
-    : `bottom-0 lg:bottom-6 right-0 lg:right-6 w-full ${sizeClasses} rounded-none lg:rounded-2xl`;
+    ? 'bottom-20 sm:bottom-22 lg:bottom-10 right-4 sm:right-6 w-72 h-14'
+    : `bottom-0 lg:bottom-10 right-0 lg:right-6 w-full ${sizeClasses} rounded-none lg:rounded-2xl`;
 
   // Theme borders & glows
   const themeBorder =
