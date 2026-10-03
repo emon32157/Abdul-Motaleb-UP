@@ -30,13 +30,8 @@ export const Footer: React.FC<FooterProps> = ({ onAdminLoginClick }) => {
             <span className="text-purple-400">Social Media</span>
           </div>
 
-          {/* Right & Subtle Admin Login */}
-          <div className="flex items-center gap-4">
-            <span className="text-slate-400">
-              Made with <span className="text-rose-500">❤️</span> for a safer digital world.
-            </span>
-
-            {/* Discreet Admin Login */}
+          {/* Right & Discreet Admin Login */}
+          <div className="flex items-center gap-3">
             <button
               onClick={onAdminLoginClick}
               className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-cyan-400 transition-colors border border-transparent hover:border-cyan-500/30 px-2 py-0.5 rounded"

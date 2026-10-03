@@ -68,7 +68,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onViewSite,
   children
 }) => {
-  const { logout, currentUser, isDemoAdmin } = useAuth();
+  const { logout, currentUser } = useAuth();
   const { messages } = useData();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -223,8 +223,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-cyan-500/20 bg-[#060a16] space-y-3">
             <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-              <span className="truncate max-w-[130px]" title={currentUser?.email || (isDemoAdmin ? 'admin@abdulmotaleb.com' : 'Admin User')}>
-                {currentUser?.email || (isDemoAdmin ? 'admin@demo' : 'Admin')}
+              <span className="truncate max-w-[130px]" title={currentUser?.email || 'Admin User'}>
+                {currentUser?.email || 'Admin User'}
               </span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 ACTIVE
