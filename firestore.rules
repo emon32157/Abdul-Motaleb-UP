@@ -10,6 +10,7 @@ service cloud.firestore {
       return isAuthenticated();
     }
 
+    // Public readable sections - editable only by Admin
     match /siteSettings/{docId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -95,6 +96,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /aiSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /aiKnowledgeBase/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Contact messages:
+    // Visitors can create an inquiry
+    // Only Admin can read, update (mark as read), or delete
     match /messages/{docId} {
       allow create: if request.resource.data.fullName is string
                     && request.resource.data.email is string
@@ -102,6 +116,7 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Admin-only private configurations
     match /adminSettings/{docId} {
       allow read, write: if isAdmin();
     }

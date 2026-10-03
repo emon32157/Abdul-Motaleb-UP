@@ -18,7 +18,8 @@ import {
   ArrowRight,
   Bot,
   Sparkles,
-  BookOpen
+  BookOpen,
+  Cloud
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -210,6 +211,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           >
             <ImageIcon className="w-4 h-4" />
             <span>Manage All 52+ Gallery Photos</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab('backup')}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono hover:bg-amber-500/20 transition-colors"
+          >
+            <Cloud className="w-4 h-4 text-amber-400" />
+            <span>Firebase Cloud Sync</span>
           </button>
 
           <button

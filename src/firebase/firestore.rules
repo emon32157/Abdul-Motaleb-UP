@@ -2,7 +2,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -11,7 +10,7 @@ service cloud.firestore {
       return isAuthenticated();
     }
 
-    // Public readable content - writeable only by Admin
+    // Public readable sections - editable only by Admin
     match /siteSettings/{docId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -97,8 +96,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /aiSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /aiKnowledgeBase/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Contact messages:
-    // Anyone can create (submit inquiry)
+    // Visitors can create an inquiry
     // Only Admin can read, update (mark as read), or delete
     match /messages/{docId} {
       allow create: if request.resource.data.fullName is string

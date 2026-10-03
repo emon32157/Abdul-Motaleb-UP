@@ -1,0 +1,354 @@
+{
+  "entities": {
+    "SiteSettings": {
+      "title": "SiteSettings",
+      "description": "General configuration and contact info for the portfolio website",
+      "type": "object",
+      "properties": {
+        "siteTitle": { "type": "string" },
+        "fullName": { "type": "string" },
+        "tagline": { "type": "string" },
+        "taglineBn": { "type": "string" },
+        "logoText": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "address": { "type": "string" },
+        "footerRights": { "type": "string" },
+        "maintenanceMode": { "type": "boolean" }
+      }
+    },
+    "Hero": {
+      "title": "Hero",
+      "description": "Hero section content, titles, and introduction",
+      "type": "object",
+      "properties": {
+        "greeting": { "type": "string" },
+        "greetingBn": { "type": "string" },
+        "name": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "titles": { "type": "array" },
+        "titlesBn": { "type": "array" },
+        "shortBio": { "type": "string" },
+        "shortBioBn": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "cvUrl": { "type": "string" },
+        "availableForHire": { "type": "boolean" },
+        "yearsOfExperience": { "type": "number" },
+        "completedProjects": { "type": "number" }
+      }
+    },
+    "About": {
+      "title": "About",
+      "description": "Detailed bio, philosophy, and personal background",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "titleBn": { "type": "string" },
+        "bio": { "type": "string" },
+        "bioBn": { "type": "string" },
+        "philosophy": { "type": "string" },
+        "philosophyBn": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "highlights": { "type": "array" }
+      }
+    },
+    "Skill": {
+      "title": "Skill",
+      "description": "Technical or professional skill with proficiency level",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "percentage": { "type": "number" },
+        "icon": { "type": "string" },
+        "order": { "type": "number" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "Service": {
+      "title": "Service",
+      "description": "Services offered by Abdul Motaleb",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleBn": { "type": "string" },
+        "description": { "type": "string" },
+        "descriptionBn": { "type": "string" },
+        "icon": { "type": "string" },
+        "features": { "type": "array" },
+        "featuresBn": { "type": "array" },
+        "order": { "type": "number" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Portfolio projects and case studies",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleBn": { "type": "string" },
+        "description": { "type": "string" },
+        "descriptionBn": { "type": "string" },
+        "category": { "type": "string" },
+        "tags": { "type": "array" },
+        "imageUrl": { "type": "string" },
+        "liveUrl": { "type": "string" },
+        "githubUrl": { "type": "string" },
+        "featured": { "type": "boolean" },
+        "order": { "type": "number" }
+      }
+    },
+    "Experience": {
+      "title": "Experience",
+      "description": "Work history, roles, and achievements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "roleBn": { "type": "string" },
+        "company": { "type": "string" },
+        "companyBn": { "type": "string" },
+        "duration": { "type": "string" },
+        "description": { "type": "string" },
+        "descriptionBn": { "type": "string" },
+        "skills": { "type": "array" },
+        "order": { "type": "number" },
+        "current": { "type": "boolean" }
+      }
+    },
+    "Certificate": {
+      "title": "Certificate",
+      "description": "Certifications, badges, and credentials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "issuer": { "type": "string" },
+        "issueDate": { "type": "string" },
+        "credentialId": { "type": "string" },
+        "credentialUrl": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "order": { "type": "number" }
+      }
+    },
+    "Gallery": {
+      "title": "Gallery",
+      "description": "Visual gallery photo item with ImgBB/hosted URL",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleBn": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "order": { "type": "number" }
+      }
+    },
+    "Media": {
+      "title": "Media",
+      "description": "Media library assets metadata with hosted URL",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "url": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "uploadedAt": { "type": "string" }
+      }
+    },
+    "Statistic": {
+      "title": "Statistic",
+      "description": "Count-up stats metrics for hero and stats section",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "value": { "type": "number" },
+        "suffix": { "type": "string" },
+        "label": { "type": "string" },
+        "labelBn": { "type": "string" },
+        "order": { "type": "number" }
+      }
+    },
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "Client reviews and recommendations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "company": { "type": "string" },
+        "content": { "type": "string" },
+        "contentBn": { "type": "string" },
+        "avatarUrl": { "type": "string" },
+        "rating": { "type": "number" },
+        "order": { "type": "number" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "Navigation": {
+      "title": "Navigation",
+      "description": "Navbar navigation links",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleBn": { "type": "string" },
+        "href": { "type": "string" },
+        "order": { "type": "number" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "SocialLink": {
+      "title": "SocialLink",
+      "description": "Social media profile links",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "platform": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "icon": { "type": "string" },
+        "order": { "type": "number" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "Inquiries sent by visitors from the contact form",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "read": { "type": "boolean" }
+      }
+    },
+    "SEO": {
+      "title": "SEO",
+      "description": "Search engine optimization and OpenGraph metadata",
+      "type": "object",
+      "properties": {
+        "metaTitle": { "type": "string" },
+        "metaDescription": { "type": "string" },
+        "keywords": { "type": "string" },
+        "canonicalUrl": { "type": "string" },
+        "ogTitle": { "type": "string" },
+        "ogDescription": { "type": "string" },
+        "ogImage": { "type": "string" }
+      }
+    },
+    "AISettings": {
+      "title": "AISettings",
+      "description": "Abdul AI Assistant configuration and personality settings",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "botName": { "type": "string" },
+        "botAvatar": { "type": "string" },
+        "model": { "type": "string" },
+        "welcomeMessage": { "type": "string" },
+        "welcomeMessageBn": { "type": "string" },
+        "systemPrompt": { "type": "string" },
+        "personality": { "type": "string" },
+        "suggestedQuestions": { "type": "array" }
+      }
+    },
+    "AIKnowledgeItem": {
+      "title": "AIKnowledgeItem",
+      "description": "Custom Q&A knowledge entry for Abdul AI Assistant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "question": { "type": "string" },
+        "answer": { "type": "string" },
+        "category": { "type": "string" },
+        "keywords": { "type": "array" },
+        "active": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "/siteSettings/{docId}": {
+      "schema": "SiteSettings",
+      "description": "Site global metadata and configuration"
+    },
+    "/hero/{docId}": {
+      "schema": "Hero",
+      "description": "Hero section content"
+    },
+    "/about/{docId}": {
+      "schema": "About",
+      "description": "About me section content"
+    },
+    "/skills/{skillId}": {
+      "schema": "Skill",
+      "description": "Technical skills list"
+    },
+    "/services/{serviceId}": {
+      "schema": "Service",
+      "description": "Professional services list"
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Portfolio projects showcase"
+    },
+    "/experience/{experienceId}": {
+      "schema": "Experience",
+      "description": "Work history experience entries"
+    },
+    "/certificates/{certificateId}": {
+      "schema": "Certificate",
+      "description": "Professional certifications"
+    },
+    "/gallery/{galleryId}": {
+      "schema": "Gallery",
+      "description": "Gallery visual items"
+    },
+    "/media/{mediaId}": {
+      "schema": "Media",
+      "description": "Uploaded media library files metadata"
+    },
+    "/statistics/{statId}": {
+      "schema": "Statistic",
+      "description": "Numerical milestones and statistics"
+    },
+    "/testimonials/{testimonialId}": {
+      "schema": "Testimonial",
+      "description": "Client testimonials and reviews"
+    },
+    "/navigation/{navId}": {
+      "schema": "Navigation",
+      "description": "Navigation links"
+    },
+    "/socialLinks/{socialId}": {
+      "schema": "SocialLink",
+      "description": "Social media links"
+    },
+    "/messages/{messageId}": {
+      "schema": "ContactMessage",
+      "description": "Submitted contact inquiries"
+    },
+    "/seo/{docId}": {
+      "schema": "SEO",
+      "description": "SEO and search metadata"
+    },
+    "/aiSettings/{docId}": {
+      "schema": "AISettings",
+      "description": "Chatbot AI configurations"
+    },
+    "/aiKnowledgeBase/{itemId}": {
+      "schema": "AIKnowledgeItem",
+      "description": "Chatbot AI custom knowledge items"
+    }
+  }
+}
