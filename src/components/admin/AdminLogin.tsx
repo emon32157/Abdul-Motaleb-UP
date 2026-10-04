@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { SEOHead } from '../seo/SEOHead';
 import {
   Lock,
   Mail,
@@ -12,12 +14,16 @@ import {
 } from 'lucide-react';
 
 interface AdminLoginProps {
-  onSuccess: () => void;
-  onBackToSite: () => void;
+  onSuccess?: () => void;
+  onBackToSite?: () => void;
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBackToSite }) => {
-  const { login, resetPassword, error, clearError } = useAuth();
+  const { login, resetPassword, error, clearError, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || '/admin/dashboard';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -25,6 +31,17 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBackToSite 
   const [resetEmail, setResetEmail] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
   const [resetError, setResetError] = useState('');
+
+  // If already authenticated as admin, redirect to target or admin dashboard
+  useEffect(() => {
+    if (isAdmin) {
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate(from, { replace: true });
+      }
+    }
+  }, [isAdmin, navigate, onSuccess, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,10 +56,22 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBackToSite 
     try {
       const success = await login(email.trim(), password);
       if (success) {
-        onSuccess();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(from, { replace: true });
+        }
       }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleBackToSite = () => {
+    if (onBackToSite) {
+      onBackToSite();
+    } else {
+      navigate('/');
     }
   };
 
@@ -63,6 +92,12 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBackToSite 
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#050811] text-white p-4 relative overflow-hidden font-sans">
+      <SEOHead
+        title="Admin Security Portal - Login"
+        description="Restricted authentication portal for verified administrators."
+        canonicalUrl="/login"
+      />
+
       {/* Background Cyber Grid */}
       <div className="absolute inset-0 cyber-grid-bg opacity-30 pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none" />
@@ -170,7 +205,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBackToSite 
           {/* Back to site */}
           <div className="text-center pt-1">
             <button
-              onClick={onBackToSite}
+              onClick={handleBackToSite}
               className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />

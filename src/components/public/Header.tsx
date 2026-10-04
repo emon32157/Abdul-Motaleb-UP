@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -8,6 +9,9 @@ export const Header: React.FC = () => {
   const { navigation, siteSettings } = useData();
   const { theme, setTheme } = useTheme();
   const { lang, toggleLang } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -30,6 +34,18 @@ export const Header: React.FC = () => {
     else setTheme('cyber-dark');
   };
 
+  const getTargetRoute = (href: string) => {
+    if (href === '#home' || href === '/') return '/';
+    if (href.startsWith('#')) return `/${href.replace('#', '')}`;
+    return href;
+  };
+
+  const isNavActive = (href: string) => {
+    const route = getTargetRoute(href);
+    if (route === '/') return location.pathname === '/';
+    return location.pathname.startsWith(route);
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
@@ -40,8 +56,8 @@ export const Header: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand / Logo */}
-        <a
-          href="#home"
+        <Link
+          to="/"
           className="flex items-center gap-2 text-lg sm:text-xl font-bold tracking-tight text-white group"
         >
           <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-400 group-hover:border-cyan-400 group-hover:shadow-[0_0_15px_rgba(0,242,254,0.4)] transition-all">
@@ -50,19 +66,26 @@ export const Header: React.FC = () => {
           <span className="font-sans font-bold bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent">
             {siteSettings.logoText || 'Abdul Motaleb'}
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-          {activeNav.map((item) => (
-            <a
-              key={item.id}
-              href={item.href}
-              className="px-3 py-1.5 rounded-md text-xs xl:text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
-            >
-              {lang === 'bn' ? item.titleBn || item.title : item.title}
-            </a>
-          ))}
+          {activeNav.map((item) => {
+            const active = isNavActive(item.href);
+            return (
+              <Link
+                key={item.id}
+                to={getTargetRoute(item.href)}
+                className={`px-3 py-1.5 rounded-md text-xs xl:text-sm font-medium transition-all ${
+                  active
+                    ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-500/40 shadow-[0_0_12px_rgba(0,242,254,0.2)] font-semibold'
+                    : 'text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10'
+                }`}
+              >
+                {lang === 'bn' ? item.titleBn || item.title : item.title}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Action Controls: Language, Theme & Mobile Trigger */}
@@ -71,7 +94,7 @@ export const Header: React.FC = () => {
           <button
             onClick={toggleLang}
             title="Switch Language (English / বাংলা)"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/5 text-xs font-mono text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/15 transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/5 text-xs font-mono text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/15 transition-all cursor-pointer"
           >
             <Globe className="w-3.5 h-3.5 text-cyan-400" />
             <span>{lang === 'en' ? 'বাংলা' : 'EN'}</span>
@@ -81,7 +104,7 @@ export const Header: React.FC = () => {
           <button
             onClick={cycleTheme}
             title={`Current Theme: ${theme.toUpperCase()}. Click to switch.`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-500/30 bg-[#0a1224]/80 text-xs text-slate-300 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(0,242,254,0.3)] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-500/30 bg-[#0a1224]/80 text-xs text-slate-300 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(0,242,254,0.3)] transition-all cursor-pointer"
           >
             {theme === 'cyber-dark' && (
               <>
@@ -112,7 +135,7 @@ export const Header: React.FC = () => {
           {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:border-cyan-400 focus:outline-none"
+            className="lg:hidden p-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:border-cyan-400 focus:outline-none cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -124,16 +147,23 @@ export const Header: React.FC = () => {
       {mobileMenuOpen && (
         <div className="lg:hidden border-b border-cyan-500/20 bg-[#070c1a]/95 backdrop-blur-xl px-4 pt-3 pb-6 animate-in slide-in-from-top duration-200">
           <div className="flex flex-col space-y-1">
-            {activeNav.map((item) => (
-              <a
-                key={item.id}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-200 hover:text-cyan-400 hover:bg-cyan-500/10 border-l-2 border-transparent hover:border-cyan-400 transition-all"
-              >
-                {lang === 'bn' ? item.titleBn || item.title : item.title}
-              </a>
-            ))}
+            {activeNav.map((item) => {
+              const active = isNavActive(item.href);
+              return (
+                <Link
+                  key={item.id}
+                  to={getTargetRoute(item.href)}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    active
+                      ? 'text-cyan-300 bg-cyan-500/15 border-l-2 border-cyan-400 font-semibold'
+                      : 'text-slate-200 hover:text-cyan-400 hover:bg-cyan-500/10 border-l-2 border-transparent'
+                  }`}
+                >
+                  {lang === 'bn' ? item.titleBn || item.title : item.title}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="mt-4 pt-4 border-t border-cyan-500/15 flex items-center justify-between text-xs text-slate-400">
@@ -141,13 +171,13 @@ export const Header: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               SYSTEM ACTIVE
             </span>
-            <a
-              href="#contact"
+            <Link
+              to="/contact"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-1.5 rounded-md bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-semibold text-xs"
             >
               {lang === 'bn' ? 'মেসেজ দিন' : 'Contact Me'}
-            </a>
+            </Link>
           </div>
         </div>
       )}

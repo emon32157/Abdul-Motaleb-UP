@@ -1,222 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { DataProvider, useData } from './context/DataContext';
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { DataProvider } from './context/DataContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 
-// Public Components
-import { LoadingScreen } from './components/public/LoadingScreen';
-import { CyberCursor } from './components/public/CyberCursor';
-import { Header } from './components/public/Header';
-import { Hero } from './components/public/Hero';
-import { About } from './components/public/About';
-import { Skills } from './components/public/Skills';
-import { Services } from './components/public/Services';
-import { Projects } from './components/public/Projects';
-import { Experience } from './components/public/Experience';
-import { Certificates } from './components/public/Certificates';
-import { Gallery } from './components/public/Gallery';
-import { Stats } from './components/public/Stats';
-import { Testimonials } from './components/public/Testimonials';
-import { Contact } from './components/public/Contact';
-import { ExtraFeaturesCard } from './components/public/ExtraFeaturesCard';
-import { Footer } from './components/public/Footer';
-import { MobileBottomBar } from './components/public/MobileBottomBar';
-import { MaintenanceScreen } from './components/public/MaintenanceScreen';
-import { AIChatbot } from './components/public/AIChatbot';
+// Layouts & Protected Routes
+import { PublicLayout } from './layouts/PublicLayout';
+import { ProtectedRoute } from './components/admin/ProtectedRoute';
 
-// Admin Components
-import { AdminLayout, AdminTab } from './components/admin/AdminLayout';
+// Public Pages
+import { HomePage } from './pages/HomePage';
+import { AboutPage } from './pages/AboutPage';
+import { ServicesPage } from './pages/ServicesPage';
+import { ProjectsPage } from './pages/ProjectsPage';
+import { ProjectDetailsPage } from './pages/ProjectDetailsPage';
+import { SkillsPage } from './pages/SkillsPage';
+import { ExperiencePage } from './pages/ExperiencePage';
+import { CertificatesPage } from './pages/CertificatesPage';
+import { CertificateDetailsPage } from './pages/CertificateDetailsPage';
+import { GalleryPage } from './pages/GalleryPage';
+import { ContactPage } from './pages/ContactPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+
+// Admin Pages
 import { AdminLogin } from './components/admin/AdminLogin';
-import { AdminDashboard } from './components/admin/AdminDashboard';
-import { AdminAISettings } from './components/admin/AdminAISettings';
-import { AdminAIKnowledge } from './components/admin/AdminAIKnowledge';
-import { AdminHero } from './components/admin/AdminHero';
-import { AdminAbout } from './components/admin/AdminAbout';
-import { AdminSkills } from './components/admin/AdminSkills';
-import { AdminServices } from './components/admin/AdminServices';
-import { AdminProjects } from './components/admin/AdminProjects';
-import { AdminExperience } from './components/admin/AdminExperience';
-import { AdminCertificates } from './components/admin/AdminCertificates';
-import { AdminGallery } from './components/admin/AdminGallery';
-import { AdminMedia } from './components/admin/AdminMedia';
-import { AdminStats } from './components/admin/AdminStats';
-import { AdminTestimonials } from './components/admin/AdminTestimonials';
-import { AdminMessages } from './components/admin/AdminMessages';
-import { AdminNavigation } from './components/admin/AdminNavigation';
-import { AdminSocial } from './components/admin/AdminSocial';
-import { AdminSEO } from './components/admin/AdminSEO';
-import { AdminTheme } from './components/admin/AdminTheme';
-import { AdminSettings } from './components/admin/AdminSettings';
-import { AdminBackup } from './components/admin/AdminBackup';
+import { AdminPage } from './pages/AdminPage';
 
-const AppContent: React.FC = () => {
-  const { siteSettings } = useData();
-  const { isAdmin, loading: authLoading } = useAuth();
-  const [systemLoaded, setSystemLoaded] = useState(false);
-  const [currentView, setCurrentView] = useState<'public' | 'admin-login' | 'admin-panel'>('public');
-  const [adminTab, setAdminTab] = useState<AdminTab>('dashboard');
+// Loading Screen
+import { LoadingScreen } from './components/public/LoadingScreen';
 
-  // Handle URL path / hash detection for admin routes
-  useEffect(() => {
-    const handleLocation = () => {
+const AppRoutes: React.FC = () => {
+  const [systemLoaded, setSystemLoaded] = useState(() => {
+    if (typeof window !== 'undefined') {
       const path = window.location.pathname;
-      const hash = window.location.hash;
-
-      if (path.startsWith('/admin/login') || hash === '#admin/login') {
-        setCurrentView('admin-login');
-      } else if (path.startsWith('/admin') || hash.startsWith('#admin')) {
-        if (isAdmin) {
-          setCurrentView('admin-panel');
-          const rawSegment = path.replace('/admin/', '').replace('#admin/', '');
-          if (rawSegment && rawSegment !== 'admin') {
-            setAdminTab(rawSegment as AdminTab);
-          }
-        } else {
-          setCurrentView('admin-login');
-        }
-      } else {
-        setCurrentView('public');
+      if (path.startsWith('/admin') || path === '/login') {
+        return true;
       }
-    };
-
-    handleLocation();
-    window.addEventListener('popstate', handleLocation);
-    window.addEventListener('hashchange', handleLocation);
-    return () => {
-      window.removeEventListener('popstate', handleLocation);
-      window.removeEventListener('hashchange', handleLocation);
-    };
-  }, [isAdmin]);
-
-  // Navigate helper
-  const navigateTo = (view: 'public' | 'admin-login' | 'admin-panel', tab?: AdminTab) => {
-    setCurrentView(view);
-    if (tab) setAdminTab(tab);
-    if (view === 'public') {
-      window.history.pushState({}, '', '/');
-    } else if (view === 'admin-login') {
-      window.history.pushState({}, '', '/admin/login');
-    } else if (view === 'admin-panel') {
-      window.history.pushState({}, '', `/admin/${tab || 'dashboard'}`);
+      return sessionStorage.getItem('am_sys_loaded') === 'true';
     }
+    return false;
+  });
+
+  const handleSystemLoaded = () => {
+    sessionStorage.setItem('am_sys_loaded', 'true');
+    setSystemLoaded(true);
   };
 
-  // If initial loading screen hasn't finished
   if (!systemLoaded) {
-    return <LoadingScreen onComplete={() => setSystemLoaded(true)} />;
+    return <LoadingScreen onComplete={handleSystemLoaded} />;
   }
 
-  // Admin Login View
-  if (currentView === 'admin-login') {
-    return (
-      <AdminLogin
-        onSuccess={() => navigateTo('admin-panel', 'dashboard')}
-        onBackToSite={() => navigateTo('public')}
-      />
-    );
-  }
-
-  // Admin Dashboard / Management View
-  if (currentView === 'admin-panel') {
-    if (!isAdmin) {
-      return (
-        <AdminLogin
-          onSuccess={() => navigateTo('admin-panel', 'dashboard')}
-          onBackToSite={() => navigateTo('public')}
-        />
-      );
-    }
-
-    return (
-      <AdminLayout
-        currentTab={adminTab}
-        onTabChange={(tab) => {
-          setAdminTab(tab);
-          window.history.pushState({}, '', `/admin/${tab}`);
-        }}
-        onViewSite={() => navigateTo('public')}
-      >
-        {adminTab === 'dashboard' && (
-          <AdminDashboard onNavigateTab={(t) => setAdminTab(t)} />
-        )}
-        {adminTab === 'ai-assistant' && <AdminAISettings />}
-        {adminTab === 'ai-knowledge' && <AdminAIKnowledge />}
-        {adminTab === 'hero' && <AdminHero />}
-        {adminTab === 'about' && <AdminAbout />}
-        {adminTab === 'skills' && <AdminSkills />}
-        {adminTab === 'services' && <AdminServices />}
-        {adminTab === 'projects' && <AdminProjects />}
-        {adminTab === 'experience' && <AdminExperience />}
-        {adminTab === 'certificates' && <AdminCertificates />}
-        {adminTab === 'gallery' && <AdminGallery />}
-        {adminTab === 'media' && <AdminMedia />}
-        {adminTab === 'statistics' && <AdminStats />}
-        {adminTab === 'testimonials' && <AdminTestimonials />}
-        {adminTab === 'messages' && <AdminMessages />}
-        {adminTab === 'navigation' && <AdminNavigation />}
-        {adminTab === 'social' && <AdminSocial />}
-        {adminTab === 'seo' && <AdminSEO />}
-        {adminTab === 'theme' && <AdminTheme />}
-        {adminTab === 'settings' && <AdminSettings />}
-        {adminTab === 'backup' && <AdminBackup />}
-      </AdminLayout>
-    );
-  }
-
-  // Maintenance Mode (non-admins see maintenance screen)
-  if (siteSettings.maintenanceMode && !isAdmin) {
-    return <MaintenanceScreen onAdminLoginClick={() => navigateTo('admin-login')} />;
-  }
-
-  // Main Public Portfolio View
   return (
-    <div className="relative min-h-screen bg-[#050811] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
-      <CyberCursor />
-      
-      {/* Background Cyber Grid */}
-      <div className="fixed inset-0 cyber-grid-bg opacity-35 pointer-events-none -z-10" />
+    <Routes>
+      {/* Public Routes with Persistent Layout (Header, Footer, Floating AI, Mobile Bottom Bar) */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
+        <Route path="/skills" element={<SkillsPage />} />
+        <Route path="/experience" element={<ExperiencePage />} />
+        <Route path="/certificates" element={<CertificatesPage />} />
+        <Route path="/certificates/:slug" element={<CertificateDetailsPage />} />
+        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+      </Route>
 
-      {/* Main Top Header */}
-      <Header />
+      {/* Admin Authentication */}
+      <Route path="/login" element={<AdminLogin />} />
+      <Route path="/admin/login" element={<Navigate to="/login" replace />} />
 
-      {/* Page Sections */}
-      <main className="space-y-12 sm:space-y-16">
-        <Hero />
-        <About />
-        <Skills />
-        <Services />
-        <Projects />
-        <Experience />
-        <Certificates />
-        <Gallery />
+      {/* Protected Admin Routes */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/admin/dashboard" replace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/:tab"
+        element={
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Bottom Section: Stats, Testimonials, Extra Features, Contact */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <Stats />
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-7">
-              <Testimonials />
-            </div>
-            <div className="lg:col-span-5">
-              <ExtraFeaturesCard />
-            </div>
-          </div>
-
-          <Contact />
-        </div>
-      </main>
-
-      {/* Footer */}
-      <Footer onAdminLoginClick={() => navigateTo('admin-login')} />
-
-      {/* Floating AI Assistant Chatbot */}
-      <AIChatbot />
-
-      {/* Mobile App Bottom Bar */}
-      <MobileBottomBar />
-    </div>
+      {/* 404 Custom Fallback Route */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 };
 
@@ -226,7 +102,9 @@ export function App() {
       <LanguageProvider>
         <AuthProvider>
           <DataProvider>
-            <AppContent />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
           </DataProvider>
         </AuthProvider>
       </LanguageProvider>

@@ -83,6 +83,7 @@ export interface ServiceItem {
 
 export interface ProjectItem {
   id: string;
+  slug?: string;
   title: string;
   titleBn?: string;
   shortDesc: string;
@@ -116,6 +117,7 @@ export interface ExperienceItem {
 
 export interface CertificateItem {
   id: string;
+  slug?: string;
   title: string;
   issuer: string;
   date: string;

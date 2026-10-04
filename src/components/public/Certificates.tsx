@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { CertificateItem } from '../../types';
-import { Award, ExternalLink, X, Eye } from 'lucide-react';
+import { getCertificateSlug } from '../../utils/slugify';
+import { Award, ExternalLink, X, Eye, ArrowRight } from 'lucide-react';
 
 export const Certificates: React.FC = () => {
   const { certificates } = useData();
@@ -54,23 +56,33 @@ export const Certificates: React.FC = () => {
                 </div>
 
                 {/* Details */}
-                <h3 className="font-bold text-base text-white group-hover:text-cyan-300 transition-colors">
+                <Link
+                  to={`/certificates/${getCertificateSlug(cert)}`}
+                  className="font-bold text-base text-white group-hover:text-cyan-300 transition-colors block"
+                >
                   {cert.title}
-                </h3>
+                </Link>
                 <div className="flex items-center justify-between mt-1 text-xs text-slate-400 font-mono">
                   <span className="text-emerald-400 font-medium">{cert.issuer}</span>
                   <span>{cert.date}</span>
                 </div>
               </div>
 
-              {/* View Certificate Button */}
-              <div className="pt-4 mt-3 border-t border-cyan-500/10">
-                <button
-                  onClick={() => setActiveCert(cert)}
-                  className="w-full py-2 px-3 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+              {/* View Certificate Buttons */}
+              <div className="pt-4 mt-3 border-t border-cyan-500/10 flex items-center gap-2">
+                <Link
+                  to={`/certificates/${getCertificateSlug(cert)}`}
+                  className="flex-1 py-2 px-3 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:text-white hover:bg-cyan-500/20 hover:border-cyan-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
                 >
                   <Award className="w-3.5 h-3.5" />
                   <span>View Certificate</span>
+                </Link>
+                <button
+                  onClick={() => setActiveCert(cert)}
+                  className="p-2 rounded-lg border border-slate-700 bg-black/40 hover:border-cyan-500/40 text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                  title="Quick Lightbox Preview"
+                >
+                  <Eye className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>

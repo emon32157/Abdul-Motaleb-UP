@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Download, Send, Facebook, Github, Linkedin, Youtube, MessageCircle, Terminal, ShieldCheck } from 'lucide-react';
@@ -89,13 +90,13 @@ export const Hero: React.FC = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a
-                href={hero.hireBtnLink || '#contact'}
+              <Link
+                to={hero.hireBtnLink && hero.hireBtnLink.startsWith('#') ? `/${hero.hireBtnLink.replace('#', '')}` : (hero.hireBtnLink || '/contact')}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-[#050811] font-bold text-sm hover:opacity-95 shadow-[0_0_20px_rgba(0,242,254,0.35)] transition-all hover:scale-105 active:scale-95"
               >
                 <Send className="w-4 h-4" />
                 <span>{lang === 'bn' ? 'হায়ার করুন' : hero.hireBtnText || 'Hire Me'}</span>
-              </a>
+              </Link>
 
               <a
                 href={hero.cvBtnLink && hero.cvBtnLink !== '#' ? hero.cvBtnLink : (siteSettings.cvUrl || '#')}
