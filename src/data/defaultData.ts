@@ -516,7 +516,7 @@ export const defaultAIChatbotSettings: AIChatbotSettings = {
   enabled: true,
   botName: 'Abdul AI Assistant',
   botAvatar: 'https://iili.io/Bev2e8G.jpg',
-  model: 'gemini-3.8-flash',
+  model: 'gpt-4o-mini',
   welcomeMessage: "Hi! 👋 I'm Abdul's AI Assistant. I can help you learn about Abdul Motaleb, his services, projects, skills and how to contact him.\n\nHow can I help you today?",
   welcomeMessageBn: "হ্যালো! 👋 আমি আবদুল মোতালেবের এআই অ্যাসিস্ট্যান্ট। আমি আপনাকে আবদুলের দক্ষতা, সেবা, প্রজেক্ট এবং যোগাযোগের বিষয়ে তথ্য দিতে পারি।\n\nআপনাকে কীভাবে সাহায্য করতে পারি?",
   systemPrompt: `You are "Abdul AI Assistant", the official intelligent cyber-security support assistant for Abdul Motaleb's personal portfolio website.

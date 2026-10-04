@@ -16,6 +16,8 @@ app.use(express.json());
 
 // Initialize Google GenAI with environment GEMINI_API_KEY
 const apiKey = process.env.GEMINI_API_KEY;
+const openaiApiKey = process.env.OPENAI_API_KEY;
+
 const ai = apiKey
   ? new GoogleGenAI({
       apiKey,
@@ -114,12 +116,13 @@ function generateLocalKnowledgeAnswer(
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
+    openaiConfigured: !!openaiApiKey,
     geminiConfigured: !!apiKey,
     timestamp: new Date().toISOString()
   });
 });
 
-// Gemini AI Chat Stream Endpoint
+// AI Chat Stream Endpoint (OpenAI + Gemini + Local Knowledge)
 app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
   try {
     const { messages, systemPrompt, model, knowledgeContext, temperature } = req.body;
@@ -128,20 +131,10 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Messages array is required.' });
     }
 
-    if (!ai) {
-      return res.status(503).json({
-        error: 'Gemini AI API key is not configured on the server. Please check your GEMINI_API_KEY.'
-      });
-    }
-
-    // Selected model fallback
-    const selectedModel = model || 'gemini-3.8-flash';
-
     // Construct enriched system instruction
     const fullSystemInstruction = `${systemPrompt || ''}\n\nAdditional Verified Knowledge Base:\n${knowledgeContext || ''}`;
 
-    // Format contents for @google/genai multi-turn conversation:
-    // Ensure contents starts with user role and alternates properly
+    // Format contents for multi-turn conversation:
     const validMessages: { role: 'user' | 'model'; content: string }[] = [];
     let seenFirstUser = false;
 
@@ -168,11 +161,6 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'No user message found to process.' });
     }
 
-    const contents = validMessages.map((m) => ({
-      role: m.role,
-      parts: [{ text: m.content }]
-    }));
-
     // Setup Server-Sent Events headers
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -181,44 +169,134 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
       res.flushHeaders();
     }
 
-    try {
-      const directResponse = await ai.models.generateContent({
-        model: selectedModel,
-        contents,
-        config: {
-          systemInstruction: fullSystemInstruction,
-          temperature: typeof temperature === 'number' ? temperature : 0.7
+    // 1. First priority: Try OpenAI API if OPENAI_API_KEY is configured
+    if (openaiApiKey) {
+      try {
+        const openaiMessages = [
+          { role: 'system', content: fullSystemInstruction },
+          ...validMessages.map((m) => ({
+            role: m.role === 'model' ? 'assistant' : 'user',
+            content: m.content
+          }))
+        ];
+
+        const openaiModel = (model && (model.startsWith('gpt-') || model.startsWith('o1') || model.startsWith('o3')))
+          ? model
+          : 'gpt-4o-mini';
+
+        const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiApiKey}`
+          },
+          body: JSON.stringify({
+            model: openaiModel,
+            messages: openaiMessages,
+            temperature: typeof temperature === 'number' ? temperature : 0.7,
+            stream: true
+          })
+        });
+
+        if (openaiRes.ok && openaiRes.body) {
+          const reader = openaiRes.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let streamedAny = false;
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (trimmed.startsWith('data: ')) {
+                const dataStr = trimmed.slice(6);
+                if (dataStr === '[DONE]') {
+                  res.write('data: [DONE]\n\n');
+                  res.end();
+                  return;
+                }
+                try {
+                  const parsed = JSON.parse(dataStr);
+                  const content = parsed.choices?.[0]?.delta?.content;
+                  if (content) {
+                    res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
+                    streamedAny = true;
+                  }
+                } catch {
+                  // Partial chunk, continue
+                }
+              }
+            }
+          }
+
+          if (streamedAny) {
+            res.write('data: [DONE]\n\n');
+            res.end();
+            return;
+          }
+        } else {
+          const errBody = await openaiRes.text().catch(() => '');
+          console.warn(`[OpenAI API status ${openaiRes.status}]`, errBody);
         }
-      });
-
-      const responseText = directResponse.text || '';
-      const words = responseText.split(' ');
-      for (let i = 0; i < words.length; i += 3) {
-        const chunkText = words.slice(i, i + 3).join(' ') + ' ';
-        res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
-        await new Promise((r) => setTimeout(r, 20));
+      } catch (openaiErr: unknown) {
+        console.warn('OpenAI stream connection failed, falling back:', (openaiErr as Error)?.message);
       }
-
-      res.write(`data: [DONE]\n\n`);
-      res.end();
-    } catch (apiError: unknown) {
-      const err = apiError as { message?: string };
-      console.warn('Gemini API fallback invoked:', err?.message);
-
-      const lastUserQuery = validMessages[validMessages.length - 1]?.content || '';
-      const isBengali = /[\u0980-\u09FF]/.test(lastUserQuery);
-      const fallbackText = generateLocalKnowledgeAnswer(lastUserQuery, knowledgeContext || '', isBengali);
-
-      const words = fallbackText.split(' ');
-      for (let i = 0; i < words.length; i += 3) {
-        const chunkText = words.slice(i, i + 3).join(' ') + ' ';
-        res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
-        await new Promise((r) => setTimeout(r, 20));
-      }
-
-      res.write(`data: [DONE]\n\n`);
-      res.end();
     }
+
+    // 2. Secondary priority: Try Gemini API if configured
+    if (ai) {
+      try {
+        const selectedModel = model && model.startsWith('gemini') ? model : 'gemini-3.8-flash';
+        const contents = validMessages.map((m) => ({
+          role: m.role,
+          parts: [{ text: m.content }]
+        }));
+
+        const directResponse = await ai.models.generateContent({
+          model: selectedModel,
+          contents,
+          config: {
+            systemInstruction: fullSystemInstruction,
+            temperature: typeof temperature === 'number' ? temperature : 0.7
+          }
+        });
+
+        const responseText = directResponse.text || '';
+        const words = responseText.split(' ');
+        for (let i = 0; i < words.length; i += 3) {
+          const chunkText = words.slice(i, i + 3).join(' ') + ' ';
+          res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+          await new Promise((r) => setTimeout(r, 20));
+        }
+
+        res.write(`data: [DONE]\n\n`);
+        res.end();
+        return;
+      } catch (geminiError: unknown) {
+        console.warn('Gemini API fallback invoked:', (geminiError as Error)?.message);
+      }
+    }
+
+    // 3. Resilient Fallback: Local Verified Knowledge Engine
+    const lastUserQuery = validMessages[validMessages.length - 1]?.content || '';
+    const isBengali = /[\u0980-\u09FF]/.test(lastUserQuery);
+    const fallbackText = generateLocalKnowledgeAnswer(lastUserQuery, knowledgeContext || '', isBengali);
+
+    const words = fallbackText.split(' ');
+    for (let i = 0; i < words.length; i += 3) {
+      const chunkText = words.slice(i, i + 3).join(' ') + ' ';
+      res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+      await new Promise((r) => setTimeout(r, 20));
+    }
+
+    res.write(`data: [DONE]\n\n`);
+    res.end();
   } catch (err: unknown) {
     const error = err as { message?: string };
     console.error('API /api/chat error:', error);

@@ -25,11 +25,13 @@ import {
   Settings
 } from 'lucide-react';
 
-const GEMINI_MODELS = [
-  { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (Recommended)', desc: 'Ultra-fast, lowest latency, smart reasoning' },
-  { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro Preview', desc: 'Complex reasoning, STEM & deep code analysis' },
-  { id: 'gemini-3.1-flash-lite', name: 'Gemini 3.1 Flash Lite', desc: 'Lightweight, rapid response generation' },
-  { id: 'gemini-flash-latest', name: 'Gemini Flash Latest', desc: 'Latest dynamic Gemini Flash stable alias' }
+const AI_MODELS = [
+  { id: 'gpt-4o-mini', name: 'OpenAI GPT-4o Mini (Default / Fast & Smart)', desc: 'OpenAI multi-turn reasoning and conversational AI' },
+  { id: 'gpt-4o', name: 'OpenAI GPT-4o (High Intelligence)', desc: 'Flagship OpenAI multimodal model' },
+  { id: 'gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo', desc: 'Standard OpenAI conversational model' },
+  { id: 'gemini-3.8-flash', name: 'Google Gemini 3.8 Flash', desc: 'Ultra-fast, lowest latency, smart reasoning' },
+  { id: 'gemini-3.1-pro-preview', name: 'Google Gemini 3.1 Pro Preview', desc: 'Complex reasoning, STEM & deep code analysis' },
+  { id: 'gemini-flash-latest', name: 'Google Gemini Flash Latest', desc: 'Dynamic Gemini Flash stable alias' }
 ];
 
 export const AdminAISettings: React.FC = () => {
@@ -244,25 +246,25 @@ export const AdminAISettings: React.FC = () => {
         <div className="bg-[#091224]/70 p-6 rounded-2xl border border-cyan-500/20 space-y-6">
           <div className="flex items-center gap-2.5 border-b border-cyan-500/10 pb-4">
             <Cpu className="w-4 h-4 text-cyan-400" />
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider">Google Gemini Model & Parameters</h4>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider">AI Engine & Model Selection (OpenAI & Gemini)</h4>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-2">Selected Gemini Model</label>
+              <label className="block text-xs font-mono text-slate-400 mb-2">Selected AI Model</label>
               <select
                 value={formData.model}
                 onChange={(e) => setFormData((prev) => ({ ...prev, model: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-xl bg-[#060a16] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
               >
-                {GEMINI_MODELS.map((m) => (
+                {AI_MODELS.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name}
                   </option>
                 ))}
               </select>
               <p className="text-[10px] font-mono text-slate-500 mt-1.5">
-                Model configured: <span className="text-cyan-300 font-bold">{formData.model}</span> (supports multi-turn streaming)
+                Current active model: <span className="text-cyan-300 font-bold">{formData.model || 'gpt-4o-mini'}</span> (OpenAI stream enabled)
               </p>
             </div>
 
