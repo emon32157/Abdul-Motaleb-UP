@@ -1,56 +1,26 @@
-import express, { Request, Response } from 'express';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { GoogleGenAI } from '@google/genai';
 
-dotenv.config();
+interface ChatMessageInput {
+  role?: string;
+  content?: string;
+}
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+interface ChatRequestBody {
+  messages?: ChatMessageInput[];
+  systemPrompt?: string;
+  model?: string;
+  knowledgeContext?: string;
+  temperature?: number;
+}
 
-const app = express();
-const PORT = Number(process.env.PORT) || 3000;
-
-app.use(express.json());
-
-// Initialize Google GenAI with environment GEMINI_API_KEY or OPENAI_API_KEY
-const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-const openaiApiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
-
-const ai = apiKey
-  ? new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build'
-        }
-      }
-    })
-  : null;
-
-// Basic IP-based rate limiter (max 40 requests per minute)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const rateLimit = (req: Request, res: Response, next: () => void) => {
-  const ip = req.ip || req.socket.remoteAddress || 'unknown';
-  const now = Date.now();
-  const limitWindow = 60 * 1000; // 1 minute
-  const maxRequests = 40;
-
-  const current = rateLimitMap.get(ip);
-  if (!current || now > current.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + limitWindow });
-    return next();
-  }
-
-  if (current.count >= maxRequests) {
-    return res.status(429).json({
-      error: 'Rate limit reached. Please wait a moment before sending another message.'
-    });
-  }
-
-  current.count++;
-  next();
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Content-Type': 'text/event-stream; charset=utf-8',
+  'Cache-Control': 'no-cache, no-transform',
+  'Connection': 'keep-alive'
 };
 
 function generateLocalKnowledgeAnswer(
@@ -112,35 +82,68 @@ function generateLocalKnowledgeAnswer(
   return "I'm Abdul's AI Assistant. I can assist you with information about Abdul's Cyber Security services, Web Development projects, verified skills, and direct contact details. How can I help you today?";
 }
 
-// Health Check Endpoint
-app.get('/api/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    openaiConfigured: !!openaiApiKey,
-    geminiConfigured: !!apiKey,
-    timestamp: new Date().toISOString()
-  });
-});
+export const handler: Handler = async (event: HandlerEvent, _context: HandlerContext) => {
+  // Handle CORS Pre-flight
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: CORS_HEADERS,
+      body: ''
+    };
+  }
 
-// AI Chat Stream Endpoint (OpenAI + Gemini + Local Knowledge)
-app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
+  // Allow GET for simple health check
+  if (event.httpMethod === 'GET') {
+    return {
+      statusCode: 200,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: 'ok',
+        service: 'Abdul AI Assistant Netlify Function',
+        timestamp: new Date().toISOString()
+      })
+    };
+  }
+
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'Method Not Allowed. Use POST.' })
+    };
+  }
+
   try {
-    const { messages, systemPrompt, model, knowledgeContext, temperature } = req.body;
-
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: 'Messages array is required.' });
+    let body: ChatRequestBody = {};
+    try {
+      body = JSON.parse(event.body || '{}');
+    } catch {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Invalid JSON request body.' })
+      };
     }
 
-    // Construct enriched system instruction
+    const { messages, systemPrompt, model, knowledgeContext, temperature } = body;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'Messages array is required.' })
+      };
+    }
+
     const fullSystemInstruction = `${systemPrompt || ''}\n\nAdditional Verified Knowledge Base:\n${knowledgeContext || ''}`;
 
-    // Format contents for multi-turn conversation:
-    const validMessages: { role: 'user' | 'model'; content: string }[] = [];
+    const validMessages: { role: 'user' | 'assistant'; content: string }[] = [];
     let seenFirstUser = false;
 
     for (const m of messages) {
       if (!m.content || typeof m.content !== 'string' || !m.content.trim()) continue;
-      const role: 'user' | 'model' = m.role === 'assistant' || m.role === 'model' ? 'model' : 'user';
+      const role: 'user' | 'assistant' =
+        m.role === 'assistant' || m.role === 'model' ? 'assistant' : 'user';
 
       if (!seenFirstUser) {
         if (role === 'user') {
@@ -158,31 +161,33 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
     }
 
     if (validMessages.length === 0) {
-      return res.status(400).json({ error: 'No user message found to process.' });
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'No user message found to process.' })
+      };
     }
 
-    // Setup Server-Sent Events headers
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    if (res.flushHeaders) {
-      res.flushHeaders();
-    }
+    const openaiApiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
+    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
-    // 1. First priority: Try OpenAI API if OPENAI_API_KEY is configured
+    let generatedText = '';
+
+    // 1. Try OpenAI if API key exists
     if (openaiApiKey) {
       try {
         const openaiMessages = [
           { role: 'system', content: fullSystemInstruction },
           ...validMessages.map((m) => ({
-            role: m.role === 'model' ? 'assistant' : 'user',
+            role: m.role,
             content: m.content
           }))
         ];
 
-        const openaiModel = (model && (model.startsWith('gpt-') || model.startsWith('o1') || model.startsWith('o3')))
-          ? model
-          : 'gpt-4o-mini';
+        const openaiModel =
+          model && (model.startsWith('gpt-') || model.startsWith('o1') || model.startsWith('o3'))
+            ? model
+            : 'gpt-4o-mini';
 
         const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -193,68 +198,40 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
           body: JSON.stringify({
             model: openaiModel,
             messages: openaiMessages,
-            temperature: typeof temperature === 'number' ? temperature : 0.7,
-            stream: true
+            temperature: typeof temperature === 'number' ? temperature : 0.7
           })
         });
 
-        if (openaiRes.ok && openaiRes.body) {
-          const reader = openaiRes.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-          let streamedAny = false;
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-              const trimmed = line.trim();
-              if (trimmed.startsWith('data: ')) {
-                const dataStr = trimmed.slice(6);
-                if (dataStr === '[DONE]') {
-                  res.write('data: [DONE]\n\n');
-                  res.end();
-                  return;
-                }
-                try {
-                  const parsed = JSON.parse(dataStr);
-                  const content = parsed.choices?.[0]?.delta?.content;
-                  if (content) {
-                    res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
-                    streamedAny = true;
-                  }
-                } catch {
-                  // Partial chunk, continue
-                }
-              }
-            }
-          }
-
-          if (streamedAny) {
-            res.write('data: [DONE]\n\n');
-            res.end();
-            return;
+        if (openaiRes.ok) {
+          const data = (await openaiRes.json()) as { choices?: { message?: { content?: string } }[] };
+          const reply = data.choices?.[0]?.message?.content;
+          if (reply) {
+            generatedText = reply;
           }
         } else {
-          const errBody = await openaiRes.text().catch(() => '');
-          console.warn(`[OpenAI API status ${openaiRes.status}]`, errBody);
+          const errText = await openaiRes.text().catch(() => '');
+          console.warn('[Netlify Function OpenAI error]', errText);
         }
-      } catch (openaiErr: unknown) {
-        console.warn('OpenAI stream connection failed, falling back:', (openaiErr as Error)?.message);
+      } catch (e: unknown) {
+        console.warn('[Netlify Function OpenAI exception]', (e as Error)?.message);
       }
     }
 
-    // 2. Secondary priority: Try Gemini API if configured
-    if (ai) {
+    // 2. Try Gemini if OpenAI failed or no OpenAI key
+    if (!generatedText && geminiApiKey) {
       try {
+        const ai = new GoogleGenAI({
+          apiKey: geminiApiKey,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build'
+            }
+          }
+        });
+
         const selectedModel = model && model.startsWith('gemini') ? model : 'gemini-3.8-flash';
         const contents = validMessages.map((m) => ({
-          role: m.role,
+          role: m.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: m.content }]
         }));
 
@@ -267,67 +244,44 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
           }
         });
 
-        const responseText = directResponse.text || '';
-        const words = responseText.split(' ');
-        for (let i = 0; i < words.length; i += 3) {
-          const chunkText = words.slice(i, i + 3).join(' ') + ' ';
-          res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
-          await new Promise((r) => setTimeout(r, 20));
+        if (directResponse.text) {
+          generatedText = directResponse.text;
         }
-
-        res.write(`data: [DONE]\n\n`);
-        res.end();
-        return;
       } catch (geminiError: unknown) {
-        console.warn('Gemini API fallback invoked:', (geminiError as Error)?.message);
+        console.warn('[Netlify Function Gemini exception]', (geminiError as Error)?.message);
       }
     }
 
-    // 3. Resilient Fallback: Local Verified Knowledge Engine
-    const lastUserQuery = validMessages[validMessages.length - 1]?.content || '';
-    const isBengali = /[\u0980-\u09FF]/.test(lastUserQuery);
-    const fallbackText = generateLocalKnowledgeAnswer(lastUserQuery, knowledgeContext || '', isBengali);
+    // 3. Fallback: Local Verified Knowledge Engine
+    if (!generatedText) {
+      const lastUserQuery = validMessages[validMessages.length - 1]?.content || '';
+      const isBengali = /[\u0980-\u09FF]/.test(lastUserQuery);
+      generatedText = generateLocalKnowledgeAnswer(lastUserQuery, knowledgeContext || '', isBengali);
+    }
 
-    const words = fallbackText.split(' ');
+    // Format response in Server-Sent Events (SSE) format for frontend reader
+    const words = generatedText.split(' ');
+    let sseOutput = '';
+
     for (let i = 0; i < words.length; i += 3) {
       const chunkText = words.slice(i, i + 3).join(' ') + ' ';
-      res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
-      await new Promise((r) => setTimeout(r, 20));
+      sseOutput += `data: ${JSON.stringify({ text: chunkText })}\n\n`;
     }
 
-    res.write(`data: [DONE]\n\n`);
-    res.end();
+    sseOutput += 'data: [DONE]\n\n';
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: sseOutput
+    };
   } catch (err: unknown) {
     const error = err as { message?: string };
-    console.error('API /api/chat error:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: error.message || 'Internal server error processing chat.' });
-    } else {
-      res.end();
-    }
+    console.error('[Netlify Function General Error]', error);
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: error.message || 'Internal server error processing chat.' })
+    };
   }
-});
-
-async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
-    // In dev, mount Vite middleware
-    const { createServer } = await import('vite');
-    const vite = await createServer({
-      server: { middlewareMode: true },
-      appType: 'spa'
-    });
-    app.use(vite.middlewares);
-  } else {
-    // In production, serve static dist files
-    app.use(express.static(path.join(__dirname, 'dist')));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-    });
-  }
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-  });
-}
-
-startServer();
+};

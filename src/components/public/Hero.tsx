@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { Download, Send, Facebook, Github, Linkedin, Youtube, MessageCircle, Terminal, ShieldCheck } from 'lucide-react';
+import { Download, Send, Terminal } from 'lucide-react';
+import { formatSocialUrl, getSocialIconComponent } from '../../utils/socialUtils';
 
 export const Hero: React.FC = () => {
   const { hero, socialLinks, siteSettings } = useData();
@@ -21,23 +22,6 @@ export const Hero: React.FC = () => {
     }, 28);
     return () => clearInterval(interval);
   }, []);
-
-  const getSocialIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case 'facebook':
-        return <Facebook className="w-4 h-4" />;
-      case 'github':
-        return <Github className="w-4 h-4" />;
-      case 'linkedin':
-        return <Linkedin className="w-4 h-4" />;
-      case 'youtube':
-        return <Youtube className="w-4 h-4" />;
-      case 'whatsapp':
-        return <MessageCircle className="w-4 h-4" />;
-      default:
-        return <ShieldCheck className="w-4 h-4" />;
-    }
-  };
 
   return (
     <section
@@ -109,20 +93,20 @@ export const Hero: React.FC = () => {
             </div>
 
             {/* Social Links Row */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-2.5 pt-2">
               {socialLinks
                 .filter((s) => s.active)
                 .sort((a, b) => a.order - b.order)
                 .map((social) => (
                   <a
                     key={social.id}
-                    href={social.url}
+                    href={formatSocialUrl(social.url, social.platform)}
                     target="_blank"
                     rel="noopener noreferrer"
                     title={social.title}
                     className="w-9 h-9 rounded-full border border-cyan-500/30 bg-[#0a1224]/80 flex items-center justify-center text-slate-300 hover:text-cyan-400 hover:border-cyan-400 hover:shadow-[0_0_12px_rgba(0,242,254,0.4)] transition-all hover:-translate-y-0.5"
                   >
-                    {getSocialIcon(social.platform)}
+                    {getSocialIconComponent(social.platform, 'w-4 h-4')}
                   </a>
                 ))}
             </div>

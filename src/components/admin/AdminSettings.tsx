@@ -110,9 +110,14 @@ export const AdminSettings: React.FC = () => {
 
       {/* Contact Settings */}
       <div className="p-6 rounded-2xl border border-cyan-500/20 bg-[#0a1224]/80 backdrop-blur-md space-y-4">
-        <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider text-cyan-400">
-          Contact Channels & Location
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider text-cyan-400">
+            Contact Channels & Location
+          </h3>
+          <span className="text-[11px] font-mono text-slate-400">
+            Facebook, GitHub, LinkedIn ইত্যাদি লিঙ্ক পরিচালনা করতে <strong className="text-cyan-400">Social Links</strong> ট্যাবে যান
+          </span>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>

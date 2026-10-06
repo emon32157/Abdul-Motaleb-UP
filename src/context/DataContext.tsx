@@ -151,6 +151,7 @@ interface DataContextType {
   updateSocial: (id: string, item: Partial<SocialLink>) => Promise<void>;
   deleteSocial: (id: string) => Promise<void>;
   reorderSocial: (items: SocialLink[]) => Promise<void>;
+  saveAllSocial: (items: SocialLink[]) => Promise<void>;
 
   // Contact Messages
   submitMessage: (fullName: string, email: string, subject: string, message: string) => Promise<void>;
@@ -510,8 +511,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = skills.map((s) => (s.id === id ? { ...s, ...item } : s));
     setSkills(updated);
     saveLocal('skills', updated);
+    const target = updated.find((s) => s.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'skills', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'skills', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore update skill notice:', e);
     }
@@ -561,8 +564,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = services.map((s) => (s.id === id ? { ...s, ...item } : s));
     setServices(updated);
     saveLocal('services', updated);
+    const target = updated.find((s) => s.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'services', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'services', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore service update notice:', e);
     }
@@ -612,8 +617,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = projects.map((p) => (p.id === id ? { ...p, ...item } : p));
     setProjects(updated);
     saveLocal('projects', updated);
+    const target = updated.find((p) => p.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'projects', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'projects', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore project update notice:', e);
     }
@@ -663,8 +670,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = experience.map((e) => (e.id === id ? { ...e, ...item } : e));
     setExperience(updated);
     saveLocal('experience', updated);
+    const target = updated.find((e) => e.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'experience', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'experience', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore experience update notice:', e);
     }
@@ -714,8 +723,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = certificates.map((c) => (c.id === id ? { ...c, ...item } : c));
     setCertificates(updated);
     saveLocal('certificates', updated);
+    const target = updated.find((c) => c.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'certificates', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'certificates', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore certificate update notice:', e);
     }
@@ -765,8 +776,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = gallery.map((g) => (g.id === id ? { ...g, ...item } : g));
     setGallery(updated);
     saveLocal('gallery', updated);
+    const target = updated.find((g) => g.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'gallery', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'gallery', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore gallery update notice:', e);
     }
@@ -841,8 +854,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = stats.map((s) => (s.id === id ? { ...s, ...item } : s));
     setStats(updated);
     saveLocal('stats', updated);
+    const target = updated.find((s) => s.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'statistics', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'statistics', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore stat update notice:', e);
     }
@@ -892,8 +907,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = testimonials.map((t) => (t.id === id ? { ...t, ...item } : t));
     setTestimonials(updated);
     saveLocal('testimonials', updated);
+    const target = updated.find((t) => t.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'testimonials', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'testimonials', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore testimonial update notice:', e);
     }
@@ -943,8 +960,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = navigation.map((n) => (n.id === id ? { ...n, ...item } : n));
     setNavigation(updated);
     saveLocal('navigation', updated);
+    const target = updated.find((n) => n.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'navigation', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'navigation', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore navigation update notice:', e);
     }
@@ -979,12 +998,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Social Links
   const addSocial = async (item: Omit<SocialLink, 'id'>) => {
     const id = 'soc-' + Date.now();
-    const newSoc = { ...item, id };
+    const newSoc: SocialLink = { ...item, id };
     const updated = [...socialLinks, newSoc];
     setSocialLinks(updated);
     saveLocal('socialLinks', updated);
     try {
-      await setDoc(doc(db, 'socialLinks', id), newSoc);
+      await setDoc(doc(db, 'socialLinks', id), newSoc, { merge: true });
     } catch (e) {
       console.warn('Firestore social link write notice:', e);
     }
@@ -994,8 +1013,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updated = socialLinks.map((s) => (s.id === id ? { ...s, ...item } : s));
     setSocialLinks(updated);
     saveLocal('socialLinks', updated);
+    const target = updated.find((s) => s.id === id);
+    if (!target) return;
     try {
-      await updateDoc(doc(db, 'socialLinks', id), item as Record<string, unknown>);
+      await setDoc(doc(db, 'socialLinks', id), target, { merge: true });
     } catch (e) {
       console.warn('Firestore social link update notice:', e);
     }
@@ -1019,11 +1040,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const batch = writeBatch(db);
       ordered.forEach((item) => {
-        batch.update(doc(db, 'socialLinks', item.id), { order: item.order });
+        batch.set(doc(db, 'socialLinks', item.id), item, { merge: true });
       });
       await batch.commit();
     } catch (e) {
       console.warn('Firestore reorder social links notice:', e);
+    }
+  };
+
+  const saveAllSocial = async (items: SocialLink[]) => {
+    const cleaned = items.map((item, idx) => ({
+      ...item,
+      order: item.order || idx + 1,
+      title: item.title?.trim() || item.platform.toUpperCase(),
+      url: item.url?.trim() || '#'
+    }));
+    setSocialLinks(cleaned);
+    saveLocal('socialLinks', cleaned);
+    try {
+      const batch = writeBatch(db);
+      cleaned.forEach((item) => {
+        batch.set(doc(db, 'socialLinks', item.id), item, { merge: true });
+      });
+      await batch.commit();
+    } catch (e) {
+      console.warn('Firestore save all social links notice:', e);
     }
   };
 
@@ -1462,6 +1503,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateSocial,
         deleteSocial,
         reorderSocial,
+        saveAllSocial,
         submitMessage,
         markMessageRead,
         deleteMessage,

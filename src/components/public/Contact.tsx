@@ -6,14 +6,11 @@ import {
   Phone,
   MapPin,
   Send,
-  Facebook,
-  Github,
-  Linkedin,
-  Youtube,
-  MessageCircle,
+  MessageSquare,
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import { formatSocialUrl, getSocialIconComponent } from '../../utils/socialUtils';
 
 export const Contact: React.FC = () => {
   const { siteSettings, socialLinks, submitMessage } = useData();
@@ -69,23 +66,6 @@ export const Contact: React.FC = () => {
       setErrorMsg(error.message || 'Failed to send message. Please try again.');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const getSocialIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case 'facebook':
-        return <Facebook className="w-4 h-4" />;
-      case 'github':
-        return <Github className="w-4 h-4" />;
-      case 'linkedin':
-        return <Linkedin className="w-4 h-4" />;
-      case 'youtube':
-        return <Youtube className="w-4 h-4" />;
-      case 'whatsapp':
-        return <MessageCircle className="w-4 h-4" />;
-      default:
-        return <Mail className="w-4 h-4" />;
     }
   };
 
@@ -159,20 +139,20 @@ export const Contact: React.FC = () => {
               {/* Follow Me Social Icons */}
               <div className="pt-4 border-t border-cyan-500/15">
                 <h4 className="text-xs font-mono text-slate-400 uppercase mb-3">Follow Me</h4>
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2.5">
                   {socialLinks
                     .filter((s) => s.active)
                     .sort((a, b) => a.order - b.order)
                     .map((social) => (
                       <a
                         key={social.id}
-                        href={social.url}
+                        href={formatSocialUrl(social.url, social.platform)}
                         target="_blank"
                         rel="noopener noreferrer"
                         title={social.title}
-                        className="w-9 h-9 rounded-full border border-cyan-500/30 bg-[#060b18] flex items-center justify-center text-slate-300 hover:text-cyan-400 hover:border-cyan-400 hover:shadow-[0_0_12px_rgba(0,242,254,0.35)] transition-all"
+                        className="w-9 h-9 rounded-full border border-cyan-500/30 bg-[#060b18] flex items-center justify-center text-slate-300 hover:text-cyan-400 hover:border-cyan-400 hover:shadow-[0_0_12px_rgba(0,242,254,0.35)] transition-all hover:scale-105"
                       >
-                        {getSocialIcon(social.platform)}
+                        {getSocialIconComponent(social.platform, 'w-4 h-4')}
                       </a>
                     ))}
                 </div>
