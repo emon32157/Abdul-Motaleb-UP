@@ -69,7 +69,7 @@ function generateLocalKnowledgeAnswer(
       query.includes('whatsapp') ||
       query.includes('হায়ার')
     ) {
-      return 'আপনি আবদুলের সাথে সরাসরি যোগাযোগ করতে পারেন:\n\n* **ইমেইল:** motaleb@example.com\n* **ফোন / হোয়াটসঅ্যাপ:** +880 1712 345678\n* অথবা নিচের **Contact Me** বাটনে ক্লিক করে ওয়েবসাইট থেকে সরাসরি মেসেজ পাঠাতে পারেন।';
+      return 'আপনি আবদুলের সাথে সরাসরি যোগাযোগ করতে পারেন:\n\n* **ইমেইল:** motalebmirzaemon@gmail.com\n* **ফোন / হোয়াটসঅ্যাপ:** +880 1880604567\n* অথবা নিচের **Contact Me** বাটনে ক্লিক করে ওয়েবসাইট থেকে সরাসরি মেসেজ পাঠাতে পারেন।';
     }
     if (
       query.includes('সার্ভিস') ||
@@ -94,7 +94,7 @@ function generateLocalKnowledgeAnswer(
     query.includes('whatsapp') ||
     query.includes('reach')
   ) {
-    return 'You can reach out to Abdul directly via:\n\n* **Email:** motaleb@example.com\n* **Phone / WhatsApp:** +880 1712 345678\n* Or click the **Contact Me** button below to send a direct message through this portfolio.';
+    return 'You can reach out to Abdul directly via:\n\n* **Email:** motalebmirzaemon@gmail.com\n* **Phone / WhatsApp:** +880 1880604567\n* Or click the **Contact Me** button below to send a direct message through this portfolio.';
   }
   if (
     query.includes('service') ||

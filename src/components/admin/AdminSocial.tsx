@@ -192,7 +192,7 @@ export const AdminSocial: React.FC = () => {
     const newEntry: Omit<SocialLink, 'id'> = {
       platform: presetId,
       title: label,
-      url: presetId === 'whatsapp' ? 'https://wa.me/8801712345678' : `https://${presetId}.com/`,
+      url: presetId === 'whatsapp' ? 'https://wa.me/8801880604567' : `https://${presetId}.com/`,
       icon: label,
       order: items.length + 1,
       active: true

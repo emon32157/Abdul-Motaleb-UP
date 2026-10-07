@@ -38,7 +38,7 @@ export const ContactPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <a
-              href={`mailto:${siteSettings.email || 'motaleb@example.com'}`}
+              href={`mailto:${siteSettings.email || 'motalebmirzaemon@gmail.com'}`}
               className="p-5 rounded-2xl border border-cyan-500/20 bg-[#091022]/80 hover:border-cyan-400 transition-all group flex items-center gap-3.5"
             >
               <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
@@ -47,7 +47,7 @@ export const ContactPage: React.FC = () => {
               <div className="overflow-hidden">
                 <span className="text-[11px] font-mono text-slate-400 block">Direct Email</span>
                 <span className="text-xs font-mono text-white truncate block font-semibold group-hover:text-cyan-300">
-                  {siteSettings.email || 'motaleb@example.com'}
+                  {siteSettings.email || 'motalebmirzaemon@gmail.com'}
                 </span>
               </div>
             </a>

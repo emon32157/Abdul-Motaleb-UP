@@ -198,9 +198,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // State instances
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() =>
-    loadLocal('siteSettings', defaultSiteSettings)
-  );
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => {
+    const loaded = loadLocal('siteSettings', defaultSiteSettings);
+    if (!loaded.email || loaded.email === 'motaleb@example.com') {
+      loaded.email = 'motalebmirzaemon@gmail.com';
+    }
+    if (!loaded.phone || loaded.phone.includes('1712')) {
+      loaded.phone = '+880 1880604567';
+    }
+    if (!loaded.whatsapp || loaded.whatsapp.includes('1712')) {
+      loaded.whatsapp = '+8801880604567';
+    }
+    return loaded;
+  });
   const [hero, setHero] = useState<HeroData>(() =>
     loadLocal('hero', defaultHeroData)
   );
@@ -254,18 +264,43 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [navigation, setNavigation] = useState<NavigationItem[]>(() =>
     loadLocal('navigation', defaultNavigation)
   );
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>(() =>
-    loadLocal('socialLinks', defaultSocialLinks)
-  );
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>(() => {
+    const loaded = loadLocal('socialLinks', defaultSocialLinks);
+    return loaded.map((s) => {
+      if (s.platform === 'whatsapp' && (s.url.includes('1712') || s.url === 'https://wa.me/8801712345678')) {
+        return { ...s, url: 'https://wa.me/8801880604567' };
+      }
+      return s;
+    });
+  });
   const [seo, setSEO] = useState<SEOData>(() =>
     loadLocal('seo', defaultSEO)
   );
-  const [aiSettings, setAISettings] = useState<AIChatbotSettings>(() =>
-    loadLocal('aiSettings', defaultAIChatbotSettings)
-  );
-  const [aiKnowledgeBase, setAIKnowledgeBase] = useState<AIKnowledgeItem[]>(() =>
-    loadLocal('aiKnowledgeBase', defaultAIKnowledgeBase)
-  );
+  const [aiSettings, setAISettings] = useState<AIChatbotSettings>(() => {
+    const loaded = loadLocal('aiSettings', defaultAIChatbotSettings);
+    if (loaded.systemPrompt && loaded.systemPrompt.includes('motaleb@example.com')) {
+      loaded.systemPrompt = loaded.systemPrompt.replace(/motaleb@example\.com/g, 'motalebmirzaemon@gmail.com');
+    }
+    if (loaded.systemPrompt && loaded.systemPrompt.includes('1712')) {
+      loaded.systemPrompt = loaded.systemPrompt.replace(/\+880\s*1712\s*345678/g, '+880 1880604567');
+      loaded.systemPrompt = loaded.systemPrompt.replace(/\+8801712345678/g, '+8801880604567');
+    }
+    return loaded;
+  });
+  const [aiKnowledgeBase, setAIKnowledgeBase] = useState<AIKnowledgeItem[]>(() => {
+    const loaded = loadLocal('aiKnowledgeBase', defaultAIKnowledgeBase);
+    return loaded.map((k) => {
+      if (k.answer && (k.answer.includes('motaleb@example.com') || k.answer.includes('1712'))) {
+        return {
+          ...k,
+          answer: k.answer
+            .replace(/motaleb@example\.com/g, 'motalebmirzaemon@gmail.com')
+            .replace(/\+880\s*1712\s*345678/g, '+880 1880604567')
+        };
+      }
+      return k;
+    });
+  });
   const [chatAnalytics, setChatAnalytics] = useState<ChatAnalytics>(() =>
     loadLocal('chatAnalytics', defaultChatAnalytics)
   );

@@ -30,9 +30,9 @@ export const defaultSiteSettings: SiteSettings = {
   googleTagManagerId: '',
   footerText: 'Abdul Motaleb - Cyber Security Expert, Ethical Hacker & Web Developer.',
   footerRights: '© 2026 Abdul Motaleb. All Rights Reserved.',
-  email: 'motaleb@example.com',
-  phone: '+880 1712 345678',
-  whatsapp: '+8801712345678',
+  email: 'motalebmirzaemon@gmail.com',
+  phone: '+880 1880604567',
+  whatsapp: '+8801880604567',
   location: 'Feni, Bangladesh',
   locationBn: 'ফেনী, বাংলাদেশ',
   cvUrl: '#'
@@ -483,7 +483,7 @@ export const defaultSocialLinks: SocialLink[] = [
   { id: 'soc-2', platform: 'github', title: 'GitHub', url: 'https://github.com/abdulmotaleb', icon: 'Github', order: 2, active: true },
   { id: 'soc-3', platform: 'linkedin', title: 'LinkedIn', url: 'https://linkedin.com/in/abdulmotaleb', icon: 'Linkedin', order: 3, active: true },
   { id: 'soc-4', platform: 'youtube', title: 'YouTube', url: 'https://youtube.com/@abdulmotaleb', icon: 'Youtube', order: 4, active: true },
-  { id: 'soc-5', platform: 'whatsapp', title: 'WhatsApp', url: 'https://wa.me/8801712345678', icon: 'MessageCircle', order: 5, active: true }
+  { id: 'soc-5', platform: 'whatsapp', title: 'WhatsApp', url: 'https://wa.me/8801880604567', icon: 'MessageCircle', order: 5, active: true }
 ];
 
 export const defaultSEO: SEOData = {
@@ -533,7 +533,7 @@ Key Directives:
    - Core Skills: Network Security, Vulnerability Assessment, Penetration Testing, Bug Bounty, React, HTML5, CSS3, Tailwind, JavaScript, PHP, WordPress, UI/UX Design, Social Media Ads & Growth.
    - Certifications: Google Ethical Hacking (2025), Coursera Cyber Security (2024), freeCodeCamp Web Development (2024), Meta Social Media Marketing (2023).
    - Experience: 2026 (Cyber Security Specialist at Security Core Labs), 2025 (Web Developer), 2024 (Social Media Expert at Digital Growth Agency), 2023 (Started Tech Journey).
-   - Contact Info: Email motaleb@example.com, Phone +880 1712 345678, WhatsApp +8801712345678, GitHub github.com/abdulmotaleb, LinkedIn linkedin.com/in/abdulmotaleb.
+   - Contact Info: Email motalebmirzaemon@gmail.com, Phone +880 1880604567, WhatsApp +8801880604567, GitHub github.com/abdulmotaleb, LinkedIn linkedin.com/in/abdulmotaleb.
 5. Strict Honesty: Never invent or hallucinate facts, credentials, or private information. If you don't know or information is private/unavailable, politely state: "I don't have that information. Please contact Abdul directly."
 6. Formatting: Use neat Markdown with bold highlights, bullet points, and code formatting where helpful. Provide direct contact links when users inquire about hiring or communication.`,
   personality: 'Professional, Cyber Security Aware, Friendly, Concise',
@@ -579,7 +579,7 @@ export const defaultAIKnowledgeBase = [
   {
     id: 'kb-3',
     question: 'How can I hire or contact Abdul?',
-    answer: 'You can reach Abdul directly via Email at motaleb@example.com, Phone/WhatsApp at +880 1712 345678, or by submitting an inquiry in the Contact section on this website.',
+    answer: 'You can reach Abdul directly via Email at motalebmirzaemon@gmail.com, Phone/WhatsApp at +880 1880604567, or by submitting an inquiry in the Contact section on this website.',
     category: 'Contact',
     keywords: ['hire', 'contact', 'email', 'phone', 'whatsapp'],
     active: true,

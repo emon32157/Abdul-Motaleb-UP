@@ -46,7 +46,7 @@ function generateClientFallbackAnswer(
       query.includes('whatsapp') ||
       query.includes('হায়ার')
     ) {
-      return `আপনি আবদুলের সাথে সরাসরি যোগাযোগ করতে পারেন:\n\n* **ইমেইল:** ${siteContext.email || 'motaleb@example.com'}\n* **ফোন / হোয়াটসঅ্যাপ:** ${siteContext.phone || '+880 1712 345678'} (${siteContext.whatsapp || '+880 1712 345678'})\n* **লোকেশন:** ${siteContext.location || 'Feni, Bangladesh'}\n* অথবা নিচের **Contact Me** বাটন থেকে সরাসরি বার্তা পাঠাতে পারেন।`;
+      return `আপনি আবদুলের সাথে সরাসরি যোগাযোগ করতে পারেন:\n\n* **ইমেইল:** ${siteContext.email || 'motalebmirzaemon@gmail.com'}\n* **ফোন / হোয়াটসঅ্যাপ:** ${siteContext.phone || '+880 1880604567'} (${siteContext.whatsapp || '+880 1880604567'})\n* **লোকেশন:** ${siteContext.location || 'Feni, Bangladesh'}\n* অথবা নিচের **Contact Me** বাটন থেকে সরাসরি বার্তা পাঠাতে পারেন।`;
     }
     if (
       query.includes('সার্ভিস') ||
@@ -72,7 +72,7 @@ function generateClientFallbackAnswer(
     query.includes('whatsapp') ||
     query.includes('reach')
   ) {
-    return `You can reach out to Abdul directly via:\n\n* **Email:** ${siteContext.email || 'motaleb@example.com'}\n* **Phone / WhatsApp:** ${siteContext.phone || '+880 1712 345678'}\n* **Location:** ${siteContext.location || 'Feni, Bangladesh'}\n* Or click the **Contact Me** button below to send a message directly.`;
+    return `You can reach out to Abdul directly via:\n\n* **Email:** ${siteContext.email || 'motalebmirzaemon@gmail.com'}\n* **Phone / WhatsApp:** ${siteContext.phone || '+880 1880604567'}\n* **Location:** ${siteContext.location || 'Feni, Bangladesh'}\n* Or click the **Contact Me** button below to send a message directly.`;
   }
   if (
     query.includes('service') ||
